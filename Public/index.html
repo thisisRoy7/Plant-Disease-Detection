@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>The Botanist - Clinical Diagnostics</title>
+    
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#004d4c",
+                        "secondary": "#1b6d24",
+                        "surface": "#f6fafa",
+                        "on-surface": "#181c1d",
+                        "on-surface-variant": "#5a6a69" // Restores the clinical gray
+                    },
+                    fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body class="bg-surface font-body text-on-surface hide-scrollbar">
+    
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col p-4 z-50">
+        <div class="mb-8 px-2">
+            <h1 class="text-xl font-bold text-teal-900 font-headline">The Botanist</h1>
+            <p class="text-xs text-on-surface-variant font-medium uppercase tracking-tighter">plant disease detector</p>
+        </div>
+        <nav class="flex-grow space-y-1">
+            <button id="nav-dashboard" class="nav-btn nav-active">
+                <span class="material-symbols-outlined">dashboard</span>Dashboard
+            </button>
+            <button id="nav-analyze" class="nav-btn">
+                <span class="material-symbols-outlined">clinical_notes</span>Analyze
+            </button>
+            <button id="nav-history" class="nav-btn">
+                <span class="material-symbols-outlined">history</span>History
+            </button>
+        </nav>
+    </aside>
+
+    <main class="ml-64 min-h-screen flex">
+        
+        <div id="main-column" class="flex-grow p-12">
+            
+            <section id="view-dashboard" class="max-w-4xl space-y-12">
+                <div>
+                    <span class="badge">Core Engine</span>
+                    <h2 class="hero-text">
+                        Biological <br/> <span class="text-primary italic font-light text-6xl">Intelligence.</span>
+                    </h2>
+                    <p class="hero-subtext">
+                        The Botanist identifies pathogenic signatures in your botanical specimens with high-fidelity neural processing.
+                    </p>
+                    <button class="btn-primary" onclick="triggerUpload()">
+                        Launch New Analysis <span class="material-symbols-outlined">biotech</span>
+                    </button>
+                </div>
+            </section>
+
+            <section id="view-analyze" class="hidden max-w-4xl space-y-8">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h2 class="section-title">Lab Analysis</h2>
+                        <p class="text-on-surface-variant">Real-time specimen breakdown</p>
+                    </div>
+                    <button class="btn-outline" onclick="triggerUpload()">
+                        <span class="material-symbols-outlined text-sm">add_a_photo</span> New Scan
+                    </button>
+                </div>
+
+                <div id="analysis-placeholder" class="placeholder-box">
+                    <span class="material-symbols-outlined text-6xl text-slate-200 mb-4">image_search</span>
+                    <p class="text-slate-400 font-medium">No active specimen. Upload an image to begin.</p>
+                </div>
+
+                <div id="analysis-results" class="hidden space-y-6">
+                    <div class="result-card">
+                        <h3 id="ana-plant" class="text-4xl font-headline font-bold text-primary">--</h3>
+                        <p id="ana-disease" class="text-xl text-secondary font-medium mb-4">--</p>
+                        <hr class="mb-6 opacity-50">
+                        <p id="ana-report" class="text-lg leading-relaxed text-slate-600 italic">--</p>
+                    </div>
+
+                    <div id="status-panel" class="status-panel">
+                        <div class="flex-grow">
+                            <p class="status-label">Inference Engine Status</p>
+                            <h4 id="status-text" class="text-xl font-headline font-bold">Ready</h4>
+                        </div>
+                        <div class="status-bar-bg">
+                            <div id="status-bar" class="status-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-history" class="hidden space-y-10">
+                <h2 class="section-title">Archive & Metrics</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <p class="metric-label">Total Scans</p>
+                        <h4 id="metric-total" class="metric-value text-primary">0</h4>
+                    </div>
+                    <div class="metric-card">
+                        <p class="metric-label">Healthy Specimens</p>
+                        <h4 id="metric-healthy" class="metric-value text-secondary">0</h4>
+                    </div>
+                    <div class="metric-card">
+                        <p class="metric-label text-red-600">Critical Alerts</p>
+                        <h4 id="metric-critical" class="metric-value text-red-600">0</h4>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="w-full text-left">
+                        <thead class="table-head">
+                            <tr>
+                                <th class="px-6 py-4">Plant Species</th>
+                                <th class="px-6 py-4">Diagnosis</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-history-table"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <aside id="analyze-sidebar" class="sidebar-recent hidden">
+            <h3 class="font-headline text-lg font-bold mb-6">Recent Scans</h3>
+            <div id="history-list-small" class="space-y-4">
+                <p class="text-sm text-slate-400 italic">No recent scans.</p>
+            </div>
+        </aside>
+
+    </main>
+
+    <input type="file" id="file-input" class="hidden" accept="image/*">
+
+    <script src="/script.js"></script>
+</body>
+</html>

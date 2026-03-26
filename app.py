@@ -5,16 +5,22 @@ import os
 import webbrowser
 from threading import Timer
 
-# Set template_folder to '.' so it looks for index.html in the same directory
-app = Flask(__name__, template_folder='.')
+# --- Flask Configuration ---
+# We point Flask to the 'public' folder for both HTML templates and static assets (CSS/JS).
+# static_url_path='' allows us to link files as "/style.css" instead of "/public/style.css".
+app = Flask(__name__, 
+            template_folder='public', 
+            static_folder='public', 
+            static_url_path='')
 
 # --- Load Model ---
 try:
+    # Ensure 'trained_model.h5' is in your main project folder
     model = tf.keras.models.load_model('trained_model.h5')
 except Exception as e:
-    print(f"Error loading model: {e}")
+    print(f"CRITICAL: Error loading model: {e}")
 
-# --- Full 38 Disease Classes ---
+# --- Dataset Metadata ---
 CLASS_NAMES = [
     'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 
     'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy', 
@@ -31,51 +37,50 @@ CLASS_NAMES = [
     'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus', 'Tomato___healthy'
 ]
 
-# --- Clinical Knowledge Base ---
-# This covers the specific biology of your dataset's classes
 DISEASE_REPORTS = {
     "Healthy": "Specimen exhibits optimal cellular structure and chlorophyll density. No pathogenic intervention required.",
-    "Scab": "Detected Venturia inaequalis fungal signatures. Symptoms include olive-green spots turning into corky brown lesions. Recommend localized fungicide and removal of fallen leaf litter.",
-    "Rot": "Pathogenic decay detected. Usually indicates Diplodia or Botryosphaeria infection. Symptoms include darkened, sunken necrotic tissue. Pruning and improved drainage are mandatory.",
-    "Rust": "Fungal pathogen Gymnosporangium identified. Characteristic orange/yellow spore pustules compromise photosynthetic capability. Requires immediate copper-based treatment.",
-    "Mildew": "Erysiphales fungal spores detected. White filamentous growth on the adaxial surface. Increase air circulation and reduce ambient humidity.",
-    "Blight": "Aggressive tissue necrosis detected (Phytophthora/Alternaria). Rapidly spreading pathogen causing water-soaked lesions. Immediate isolation of the specimen is critical.",
-    "Bacterial Spot": "Xanthomonas signatures present. Small, water-soaked lesions leading to chlorosis. Avoid overhead irrigation and apply bactericide.",
+    "Scab": "Detected Venturia inaequalis fungal signatures. Symptoms include olive-green spots turning into brown lesions. Recommend localized fungicide.",
+    "Rot": "Pathogenic decay detected. Usually indicates Diplodia or Botryosphaeria infection. Pruning and improved drainage are mandatory.",
+    "Rust": "Fungal pathogen Gymnosporangium identified. Orange/yellow spore pustules compromise photosynthesis. Requires copper-based treatment.",
+    "Mildew": "Erysiphales fungal spores detected. White filamentous growth observed. Increase air circulation and reduce ambient humidity.",
+    "Blight": "Aggressive tissue necrosis detected. Rapidly spreading pathogen causing water-soaked lesions. Immediate isolation is critical.",
+    "Bacterial Spot": "Xanthomonas signatures present. Small, water-soaked lesions leading to chlorosis. Avoid overhead irrigation.",
     "Gray Leaf Spot": "Cercospora zeae-maydis detected. Rectangular lesions running parallel to leaf veins. Common in high-moisture environments.",
-    "Esca": "Complex fungal vascular disease (Black Measles). Identified by 'tiger-stripe' chlorosis. Requires deep-tissue pruning and vineyard sanitation.",
+    "Esca": "Complex fungal vascular disease. Identified by 'tiger-stripe' chlorosis. Requires deep-tissue pruning and vineyard sanitation.",
     "Leaf Blight": "Isariopsis fungal infection. Irregular reddish-brown lesions. Common in dense canopies with poor ventilation.",
-    "Citrus Greening": "Candidatus Liberibacter asiaticus (HLB) detected. Systemic bacterial infection causing blotchy mottling and nutrient deficiency. Monitor for psyllid vectors.",
-    "Leaf Scorch": "Diplocarpon earlianum identified. Purple/brown spots that coalesce, causing the leaf to appear 'scorched'. Prune affected area.",
-    "Leaf Mold": "Passalora fulva signatures. Pale green/yellow spots with velvet-like fungal growth on the underside. Lower greenhouse humidity.",
-    "Septoria": "Septoria lycopersici fungal spots. Small circular lesions with gray centers and dark borders. Spreads via splashing water.",
-    "Spider Mites": "Arachnid infestation detected (Tetranychus urticae). Results in fine stippling (yellow dots) and webbing. Recommend miticides or predatory insects.",
-    "Target Spot": "Corynespora cassiicola identified. Concentric rings within necrotic lesions, resembling a target. Often thrives in warm, humid conditions.",
+    "Citrus Greening": "Candidatus Liberibacter asiaticus (HLB) detected. Systemic bacterial infection causing blotchy mottling. Monitor for psyllid vectors.",
+    "Leaf Scorch": "Diplocarpon earlianum identified. Purple/brown spots that coalesce, causing the leaf to appear 'scorched'.",
+    "Leaf Mold": "Passalora fulva signatures. Pale green/yellow spots with velvet-like fungal growth. Lower greenhouse humidity.",
+    "Septoria": "Septoria lycopersici fungal spots. Small circular lesions with gray centers. Spreads via splashing water.",
+    "Spider Mites": "Arachnid infestation detected. Results in fine stippling and webbing. Recommend miticides or predatory insects.",
+    "Target Spot": "Corynespora cassiicola identified. Concentric rings within necrotic lesions. Often thrives in warm, humid conditions.",
     "Yellow Leaf Curl": "Begomovirus (TYLCV) signatures. Upward curling of leaves and severe stunting. Vector control (whitefly) is essential.",
-    "Mosaic Virus": "Viral pathogenic signature (ToMV). Mottling and 'mosaic' patterns on foliage. Highly stable virus; sanitize all equipment immediately."
+    "Mosaic Virus": "Viral pathogenic signature (ToMV). Mottling and 'mosaic' patterns on foliage. Sanitize all equipment immediately."
 }
 
+# --- Logic Functions ---
 def generate_report(disease_label):
-    # Default message if no specific keyword matches
-    report = "Cellular degradation detected. Suggesting clinical isolation, removal of infected foliage, and a broad-spectrum anti-pathogen application."
+    """Matches the classified disease to a professional medical report."""
+    report = "Cellular degradation detected. Suggesting clinical isolation and a broad-spectrum anti-pathogen application."
     
-    # Check for 'healthy' first
     if "healthy" in disease_label.lower():
         return DISEASE_REPORTS["Healthy"]
     
-    # Match the diagnosis to our knowledge base
     for key, description in DISEASE_REPORTS.items():
         if key.lower() in disease_label.lower():
             report = description
             break
-            
     return report
 
+# --- Routes ---
 @app.route('/')
 def index():
+    """Serves the main dashboard from the public folder."""
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    """Handles image upload, runs AI inference, and returns JSON diagnostics."""
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'})
     
@@ -83,30 +88,27 @@ def predict():
     if file.filename == '':
         return jsonify({'error': 'Empty filename'})
 
-    # Save temp file for prediction
     temp_path = "temp_analysis.jpg"
     file.save(temp_path)
 
     try:
-        # Image Processing (Matching the 128x128 your model expects)
+        # 1. Preprocess (Model expects 128x128)
         image = tf.keras.preprocessing.image.load_img(temp_path, target_size=(128, 128))
         input_arr = tf.keras.preprocessing.image.img_to_array(image)
-        input_arr = np.expand_dims(input_arr, axis=0) # Convert to batch
+        input_arr = np.expand_dims(input_arr, axis=0)
         
-        # Run AI Inference
+        # 2. Inference
         predictions = model.predict(input_arr)
         result_index = np.argmax(predictions)
         
-        # Parse the 'computery' raw name
+        # 3. Parsing
         raw_name = CLASS_NAMES[result_index]
         parts = raw_name.split('___')
         plant_name = parts[0].replace('_', ' ').title()
         disease_name = parts[1].replace('_', ' ').title()
         
-        # Get the professional diagnostic text
         clinical_report = generate_report(disease_name)
         
-        # Return the clean JSON
         return jsonify({
             'plant': plant_name,
             'disease': disease_name,
@@ -117,16 +119,16 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)})
     finally:
-        # Cleanup temp file
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
+# --- Automation ---
 def open_browser():
     webbrowser.open_new("http://127.0.0.1:5000")
 
 if __name__ == '__main__':
-    # This waits 1.5 seconds, then opens the browser tab automatically
+    # Auto-launch the browser
     Timer(1.5, open_browser).start()
     
-    # Run the app
+    # Run the Flask app
     app.run(debug=False, port=5000)
