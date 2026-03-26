@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PlantPulse - Clinical Diagnostics</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#004d4c",
+                        "secondary": "#1b6d24",
+                        "surface": "#f6fafa",
+                        "on-surface": "#181c1d",
+                        "on-surface-variant": "#3e4948"
+                    },
+                    fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); }
+    </style>
+</head>
+
+<body class="bg-surface font-body text-on-surface">
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 border-r-0 flex flex-col p-4 z-50">
+        <div class="mb-8 px-2">
+            <h1 class="text-xl font-bold text-teal-900 font-headline">The Botanist</h1>
+            <p class="text-xs text-on-surface-variant font-medium">Clinical Diagnostics</p>
+        </div>
+        <nav class="flex-grow space-y-1">
+            <a class="flex items-center gap-3 px-4 py-3 bg-teal-100/50 text-teal-900 rounded-lg font-bold" href="#"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+            <a class="flex items-center gap-3 px-4 py-3 text-slate-600" href="#"><span class="material-symbols-outlined">clinical_notes</span>Analyze</a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 pt-16 min-h-screen flex">
+        <section class="w-3/5 p-12 space-y-16">
+            <div>
+                <span class="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full mb-6 uppercase tracking-widest">Diagnostic Engine</span>
+                <h2 id="main-title" class="text-6xl font-headline font-extrabold leading-tight tracking-tighter mb-8">
+                    Deciphering the <br/> <span class="text-primary italic">Biological Signature</span> of Flora.
+                </h2>
+                <p id="main-description" class="text-xl text-on-surface-variant leading-relaxed mb-10">
+                    Upload a high-fidelity image to isolate symptomatic tissue for algorithmic assessment.
+                </p>
+                <div class="flex gap-4">
+                    <button id="upload-btn" class="px-8 py-4 bg-primary text-white rounded-full font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
+                        Begin Diagnosis <span class="material-symbols-outlined">photo_camera</span>
+                    </button>
+                    <input type="file" id="file-input" class="hidden" accept="image/*">
+                </div>
+            </div>
+        </section>
+
+        <section class="w-2/5 bg-slate-50 p-10 space-y-10">
+            <div class="bg-primary p-6 rounded-xl text-white shadow-xl">
+                <p class="text-xs opacity-70 font-bold">System Status</p>
+                <h4 id="status-text" class="text-3xl font-headline font-bold">Ready for Input</h4>
+                <div class="w-full h-1 bg-white/20 rounded-full mt-4"><div class="w-full h-full bg-green-400"></div></div>
+            </div>
+            
+            <div class="space-y-4">
+                <h3 class="font-headline text-lg font-bold">Recent Scan Result</h3>
+                <div id="result-card" class="bg-white p-6 rounded-xl border border-slate-200 hidden">
+                    <h5 id="res-plant" class="font-bold text-primary">Plant Species</h5>
+                    <p id="res-disease" class="text-sm font-medium mb-2">Disease Label</p>
+                    <p id="res-report" class="text-xs text-slate-500 italic">Full clinical report will appear here...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+
+        uploadBtn.onclick = () => fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadBtn.innerHTML = "Processing...";
+            
+            try {
+                const response = await fetch('/predict', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                // Update UI
+                document.getElementById('main-title').innerHTML = `${data.plant} <br/><span class="text-primary italic">${data.disease}</span>`;
+                document.getElementById('main-description').innerText = data.report;
+                document.getElementById('status-text').innerText = data.status;
+                
+                // Show Result Card
+                const card = document.getElementById('result-card');
+                card.classList.remove('hidden');
+                document.getElementById('res-plant').innerText = data.plant;
+                document.getElementById('res-disease').innerText = data.disease;
+                document.getElementById('res-report').innerText = data.report;
+
+                uploadBtn.innerHTML = `Success <span class="material-symbols-outlined">check_circle</span>`;
+            } catch (err) {
+                uploadBtn.innerHTML = "Error Scanning";
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# --- Virtual Environment ---
+venv/
+ENV/
+env/
+
+# --- Large AI Models & Data ---
+trained_model.h5
+trained_model.keras
+Plant_Disease_Dataset/
+Plant_Disease_Dataset.zip
+training_hist.json
+
+# --- Temporary/Upload Files ---
+temp_analysis.jpg
+temp_upload.jpg
+static/uploads/*
+!static/uploads/.gitkeep
+
+# --- Python Junk ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
