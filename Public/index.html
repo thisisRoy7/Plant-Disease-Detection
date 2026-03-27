@@ -34,25 +34,33 @@
 
 <body class="bg-surface font-body text-on-surface hide-scrollbar">
     
-    <aside class="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col p-4 z-50">
-        <div class="mb-8 px-2">
-            <h1 class="text-xl font-bold text-teal-900 font-headline">The Botanist</h1>
-            <p class="text-xs text-on-surface-variant font-medium uppercase tracking-tighter">plant disease detector</p>
+    <aside id="left-sidebar" class="sidebar-left">
+        <div class="mb-8 px-2 flex items-center justify-between">
+            <div class="sidebar-logo-text">
+                <h1 class="text-xl font-bold text-teal-900 font-headline whitespace-nowrap">The Botanist</h1>
+                <p class="text-xs text-on-surface-variant font-medium uppercase tracking-tighter whitespace-nowrap">plant disease detector</p>
+            </div>
+            <button onclick="toggleLeftSidebar()" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-slate-400" id="left-toggle-icon">menu_open</span>
+            </button>
         </div>
         <nav class="flex-grow space-y-1">
             <button id="nav-dashboard" class="nav-btn nav-active">
-                <span class="material-symbols-outlined">dashboard</span>Dashboard
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-label">Dashboard</span>
             </button>
             <button id="nav-analyze" class="nav-btn">
-                <span class="material-symbols-outlined">clinical_notes</span>Analyze
+                <span class="material-symbols-outlined">clinical_notes</span>
+                <span class="nav-label">Analyze</span>
             </button>
             <button id="nav-history" class="nav-btn">
-                <span class="material-symbols-outlined">history</span>History
+                <span class="material-symbols-outlined">history</span>
+                <span class="nav-label">History</span>
             </button>
         </nav>
     </aside>
 
-    <main class="ml-64 min-h-screen flex">
+    <main id="main-content" class="main-content-shift min-h-screen flex">
         
         <div id="main-column" class="flex-grow">
             
@@ -144,7 +152,10 @@
             </section>
         </div>
 
-        <aside id="analyze-sidebar" class="sidebar-recent hidden">
+        <aside id="analyze-sidebar" class="sidebar-right hidden">
+            <button id="right-sidebar-toggle" onclick="toggleRightSidebar()" class="sidebar-toggle-handle">
+                <span class="material-symbols-outlined" id="right-toggle-icon">keyboard_double_arrow_right</span>
+            </button>
             <h3 class="font-headline text-lg font-bold mb-6">Recent Scans</h3>
             <div id="history-list-small" class="space-y-4">
                 <p class="text-sm text-slate-400 italic">No recent scans.</p>

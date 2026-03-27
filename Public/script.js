@@ -2,6 +2,8 @@
 
 // --- State Management ---
 let allHistory = [];
+let leftSidebarCollapsed = false;
+let rightSidebarCollapsed = false;
 
 // --- Helper Functions ---
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -26,6 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
     navBtns.history.onclick = () => showView('history');
 });
 
+// --- Sidebar Toggles ---
+function toggleLeftSidebar() {
+    leftSidebarCollapsed = !leftSidebarCollapsed;
+    const sidebar = document.getElementById('left-sidebar');
+    const main = document.getElementById('main-content');
+    const icon = document.getElementById('left-toggle-icon');
+
+    if (leftSidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        main.style.marginLeft = "80px";
+        icon.innerText = "side_navigation";
+    } else {
+        sidebar.classList.remove('collapsed');
+        main.style.marginLeft = "256px";
+        icon.innerText = "menu_open";
+    }
+}
+
+function toggleRightSidebar() {
+    rightSidebarCollapsed = !rightSidebarCollapsed;
+    const sidebar = document.getElementById('analyze-sidebar');
+    const icon = document.getElementById('right-toggle-icon');
+
+    if (rightSidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        icon.innerText = "keyboard_double_arrow_left";
+    } else {
+        sidebar.classList.remove('collapsed');
+        icon.innerText = "keyboard_double_arrow_right";
+    }
+}
+
 // --- View Switching ---
 function showView(viewName) {
     Object.keys(views).forEach(key => {
@@ -36,6 +70,8 @@ function showView(viewName) {
     navBtns[viewName].classList.add('nav-active');
 
     const side = document.getElementById('analyze-sidebar');
+    const toggle = document.getElementById('right-sidebar-toggle');
+    
     if (viewName === 'analyze') {
         side.classList.remove('hidden');
     } else {
@@ -56,13 +92,11 @@ fileInput.onchange = async (e) => {
 
     showView('analyze');
     
-    // Elements
     const statusText = document.getElementById('status-text');
     const statusBar = document.getElementById('status-bar');
     const placeholder = document.getElementById('analysis-placeholder');
     const resultsArea = document.getElementById('analysis-results');
 
-    // 1. Enter Loading State
     statusText.innerText = "Initializing Neural Link...";
     statusBar.style.width = "15%";
     statusBar.style.backgroundColor = "#4ade80"; 
@@ -83,17 +117,14 @@ fileInput.onchange = async (e) => {
     formData.append('file', file);
 
     try {
-        // 2. Start Request & Random Delay Timer (1-3 seconds)
         const fetchPromise = fetch('/predict', { method: 'POST', body: formData });
         const randomDelayTime = Math.floor(Math.random() * 2000) + 1000;
         
-        // Intermediate Progress Update (Visual Flavor)
         setTimeout(() => {
             statusText.innerText = "Analyzing Cellular Integrity...";
             statusBar.style.width = "50%";
         }, randomDelayTime / 2);
 
-        // Wait for both to complete
         const [response] = await Promise.all([
             fetchPromise,
             sleep(randomDelayTime)
@@ -101,7 +132,6 @@ fileInput.onchange = async (e) => {
 
         const data = await response.json();
 
-        // 3. Finalize UI
         placeholder.classList.add('hidden');
         resultsArea.classList.remove('hidden');
         
@@ -118,12 +148,11 @@ fileInput.onchange = async (e) => {
         statusBar.style.backgroundColor = "#ef4444";
         placeholder.innerHTML = `<p class="text-red-500 font-bold">Diagnostic Failure: Server Unreachable.</p>`;
     } finally {
-        // Reset file input so same image can be uploaded twice if needed
         fileInput.value = '';
     }
 };
 
-// --- History & Metrics (Keep existing) ---
+// --- History Rendering (UPDATED) ---
 function saveToHistory(data) {
     const entry = {
         ...data,
@@ -138,11 +167,11 @@ function renderSmallHistory() {
     container.innerHTML = '';
     allHistory.slice(0, 5).forEach(item => {
         const div = document.createElement('div');
-        div.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-sm mb-3";
+        div.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-sm mb-3 sidebar-card";
         div.innerHTML = `
-            <p class="font-bold text-primary">${item.plant}</p>
-            <p class="text-xs text-slate-500 truncate">${item.disease}</p>
-            <div class="mt-2 flex justify-between items-center text-[10px] font-bold uppercase">
+            <p class="font-bold text-primary mb-1">${item.plant}</p>
+            <p class="text-xs text-slate-500 truncate mb-3">${item.disease}</p>
+            <div class="flex flex-col gap-1 text-[10px] font-bold uppercase">
                 <span class="${item.status === 'Optimal Health' ? 'text-green-600' : 'text-red-500'}">${item.status}</span>
                 <span class="text-slate-300">${item.time}</span>
             </div>
