@@ -1,5 +1,10 @@
+// Public/script.js
+
 // --- State Management ---
 let allHistory = [];
+
+// --- Helper Functions ---
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 // --- Elements ---
 const fileInput = document.getElementById('file-input');
@@ -16,7 +21,6 @@ const views = {
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Nav Click Listeners
     navBtns.dashboard.onclick = () => showView('dashboard');
     navBtns.analyze.onclick = () => showView('analyze');
     navBtns.history.onclick = () => showView('history');
@@ -24,17 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- View Switching ---
 function showView(viewName) {
-    // Reset all views and buttons
     Object.keys(views).forEach(key => {
         views[key].classList.add('hidden');
         navBtns[key].classList.remove('nav-active');
     });
-
-    // Show selected
     views[viewName].classList.remove('hidden');
     navBtns[viewName].classList.add('nav-active');
 
-    // Handle Sidebar Visibility
     const side = document.getElementById('analyze-sidebar');
     if (viewName === 'analyze') {
         side.classList.remove('hidden');
@@ -42,7 +42,6 @@ function showView(viewName) {
         side.classList.add('hidden');
     }
 
-    // Refresh history data if needed
     if (viewName === 'history') renderFullHistory();
 }
 
@@ -55,18 +54,28 @@ fileInput.onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Switch to Analysis workstation
     showView('analyze');
     
-    // UI Loading State
+    // Elements
     const statusText = document.getElementById('status-text');
     const statusBar = document.getElementById('status-bar');
     const placeholder = document.getElementById('analysis-placeholder');
     const resultsArea = document.getElementById('analysis-results');
 
-    statusText.innerText = "Analyzing Specimen...";
-    statusBar.style.width = "30%";
-    placeholder.innerHTML = `<div class="animate-pulse text-primary font-bold">Sequencing Pathogens...</div>`;
+    // 1. Enter Loading State
+    statusText.innerText = "Initializing Neural Link...";
+    statusBar.style.width = "15%";
+    statusBar.style.backgroundColor = "#4ade80"; 
+    
+    placeholder.innerHTML = `
+        <div class="flex flex-col items-center">
+            <div class="scanning-wrapper mb-6">
+                <div class="scan-line"></div>
+                <span class="loader"></span>
+            </div>
+            <p class="text-primary font-bold animate-pulse tracking-widest uppercase text-xs">Sequencing...</p>
+        </div>
+    `;
     placeholder.classList.remove('hidden');
     resultsArea.classList.add('hidden');
     
@@ -74,10 +83,25 @@ fileInput.onchange = async (e) => {
     formData.append('file', file);
 
     try {
-        const response = await fetch('/predict', { method: 'POST', body: formData });
+        // 2. Start Request & Random Delay Timer (1-3 seconds)
+        const fetchPromise = fetch('/predict', { method: 'POST', body: formData });
+        const randomDelayTime = Math.floor(Math.random() * 2000) + 1000;
+        
+        // Intermediate Progress Update (Visual Flavor)
+        setTimeout(() => {
+            statusText.innerText = "Analyzing Cellular Integrity...";
+            statusBar.style.width = "50%";
+        }, randomDelayTime / 2);
+
+        // Wait for both to complete
+        const [response] = await Promise.all([
+            fetchPromise,
+            sleep(randomDelayTime)
+        ]);
+
         const data = await response.json();
 
-        // Update Results UI
+        // 3. Finalize UI
         placeholder.classList.add('hidden');
         resultsArea.classList.remove('hidden');
         
@@ -90,13 +114,16 @@ fileInput.onchange = async (e) => {
 
         saveToHistory(data);
     } catch (err) {
-        statusText.innerText = "Diagnostic Failure";
+        statusText.innerText = "Inference Error";
         statusBar.style.backgroundColor = "#ef4444";
-        placeholder.innerText = "Error during scan. Check server connection.";
+        placeholder.innerHTML = `<p class="text-red-500 font-bold">Diagnostic Failure: Server Unreachable.</p>`;
+    } finally {
+        // Reset file input so same image can be uploaded twice if needed
+        fileInput.value = '';
     }
 };
 
-// --- History & Metrics ---
+// --- History & Metrics (Keep existing) ---
 function saveToHistory(data) {
     const entry = {
         ...data,
@@ -109,10 +136,9 @@ function saveToHistory(data) {
 function renderSmallHistory() {
     const container = document.getElementById('history-list-small');
     container.innerHTML = '';
-    
     allHistory.slice(0, 5).forEach(item => {
         const div = document.createElement('div');
-        div.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-sm";
+        div.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 text-sm mb-3";
         div.innerHTML = `
             <p class="font-bold text-primary">${item.plant}</p>
             <p class="text-xs text-slate-500 truncate">${item.disease}</p>
@@ -128,7 +154,6 @@ function renderSmallHistory() {
 function renderFullHistory() {
     const table = document.getElementById('full-history-table');
     table.innerHTML = '';
-
     let healthyCount = 0;
     let criticalCount = 0;
 
@@ -147,7 +172,6 @@ function renderFullHistory() {
         table.appendChild(tr);
     });
 
-    // Update Metrics
     document.getElementById('metric-total').innerText = allHistory.length;
     document.getElementById('metric-healthy').innerText = healthyCount;
     document.getElementById('metric-critical').innerText = criticalCount;
