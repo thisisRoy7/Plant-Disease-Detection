@@ -56,7 +56,7 @@
         
         <div id="main-column" class="flex-grow">
             
-            <section id="view-dashboard" class="dashboard-full-screen">
+            <section id="view-dashboard" class="app-view-bg overlay-dashboard">
                 <div class="max-w-4xl">
                     <h2 class="hero-text">
                         Biological <br/> <span class="text-primary italic font-light text-6xl">Intelligence.</span>
@@ -70,72 +70,76 @@
                 </div>
             </section>
 
-            <section id="view-analyze" class="hidden p-12 max-w-5xl space-y-8">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <h2 class="section-title">Lab Analysis</h2>
-                        <p class="text-on-surface-variant">Real-time specimen breakdown</p>
-                    </div>
-                    <button class="btn-outline" onclick="triggerUpload()">
-                        <span class="material-symbols-outlined text-sm">add_a_photo</span> New Scan
-                    </button>
-                </div>
-
-                <div id="analysis-placeholder" class="placeholder-box">
-                    <span class="material-symbols-outlined text-6xl text-slate-200 mb-4">image_search</span>
-                    <p class="text-slate-400 font-medium">No active specimen. Upload an image to begin.</p>
-                </div>
-
-                <div id="analysis-results" class="hidden space-y-6">
-                    <div class="result-card">
-                        <h3 id="ana-plant" class="text-4xl font-headline font-bold text-primary">--</h3>
-                        <p id="ana-disease" class="text-xl text-secondary font-medium mb-4">--</p>
-                        <hr class="mb-6 opacity-50">
-                        <p id="ana-report" class="text-lg leading-relaxed text-slate-600 italic">--</p>
-                    </div>
-
-                    <div id="status-panel" class="status-panel">
-                        <div class="flex-grow">
-                            <p class="status-label">Inference Engine Status</p>
-                            <h4 id="status-text" class="text-xl font-headline font-bold">Ready</h4>
+            <section id="view-analyze" class="hidden app-view-bg overlay-subtle space-y-8">
+                <div class="max-w-5xl w-full">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h2 class="section-title">Lab Analysis</h2>
+                            <p class="text-on-surface-variant">Real-time specimen breakdown</p>
                         </div>
-                        <div class="status-bar-bg">
-                            <div id="status-bar" class="status-bar-fill"></div>
+                        <button class="btn-outline" onclick="triggerUpload()">
+                            <span class="material-symbols-outlined text-sm">add_a_photo</span> New Scan
+                        </button>
+                    </div>
+
+                    <div id="analysis-placeholder" class="placeholder-box">
+                        <span class="material-symbols-outlined text-6xl text-slate-200 mb-4">image_search</span>
+                        <p class="text-slate-400 font-medium">No active specimen. Upload an image to begin.</p>
+                    </div>
+
+                    <div id="analysis-results" class="hidden space-y-6">
+                        <div class="result-card">
+                            <h3 id="ana-plant" class="text-4xl font-headline font-bold text-primary">--</h3>
+                            <p id="ana-disease" class="text-xl text-secondary font-medium mb-4">--</p>
+                            <hr class="mb-6 opacity-50">
+                            <p id="ana-report" class="text-lg leading-relaxed text-slate-600 italic">--</p>
+                        </div>
+
+                        <div id="status-panel" class="status-panel">
+                            <div class="flex-grow">
+                                <p class="status-label">Inference Engine Status</p>
+                                <h4 id="status-text" class="text-xl font-headline font-bold">Ready</h4>
+                            </div>
+                            <div class="status-bar-bg">
+                                <div id="status-bar" class="status-bar-fill"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="view-history" class="hidden p-12 space-y-10">
-                <h2 class="section-title">Archive & Metrics</h2>
-                
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <p class="metric-label">Total Scans</p>
-                        <h4 id="metric-total" class="metric-value text-primary">0</h4>
+            <section id="view-history" class="hidden app-view-bg overlay-subtle space-y-10">
+                <div class="max-w-6xl w-full">
+                    <h2 class="section-title mb-8">Archive & Metrics</h2>
+                    
+                    <div class="metrics-grid mb-10">
+                        <div class="metric-card">
+                            <p class="metric-label">Total Scans</p>
+                            <h4 id="metric-total" class="metric-value text-primary">0</h4>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-label">Healthy Specimens</p>
+                            <h4 id="metric-healthy" class="metric-value text-secondary">0</h4>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-label text-red-600">Critical Alerts</p>
+                            <h4 id="metric-critical" class="metric-value text-red-600">0</h4>
+                        </div>
                     </div>
-                    <div class="metric-card">
-                        <p class="metric-label">Healthy Specimens</p>
-                        <h4 id="metric-healthy" class="metric-value text-secondary">0</h4>
-                    </div>
-                    <div class="metric-card">
-                        <p class="metric-label text-red-600">Critical Alerts</p>
-                        <h4 id="metric-critical" class="metric-value text-red-600">0</h4>
-                    </div>
-                </div>
 
-                <div class="table-container">
-                    <table class="w-full text-left">
-                        <thead class="table-head">
-                            <tr>
-                                <th class="px-6 py-4">Plant Species</th>
-                                <th class="px-6 py-4">Diagnosis</th>
-                                <th class="px-6 py-4">Status</th>
-                                <th class="px-6 py-4 text-right">Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="full-history-table"></tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="w-full text-left">
+                            <thead class="table-head">
+                                <tr>
+                                    <th class="px-6 py-4">Plant Species</th>
+                                    <th class="px-6 py-4">Diagnosis</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="full-history-table"></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
         </div>
