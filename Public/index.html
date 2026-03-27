@@ -1,5 +1,3 @@
-Public/index.html
-
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
@@ -23,7 +21,7 @@ Public/index.html
                         "secondary": "#1b6d24",
                         "surface": "#f6fafa",
                         "on-surface": "#181c1d",
-                        "on-surface-variant": "#5a6a69" // Restores the clinical gray
+                        "on-surface-variant": "#5a6a69" 
                     },
                     fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
                 }
@@ -56,16 +54,15 @@ Public/index.html
 
     <main class="ml-64 min-h-screen flex">
         
-        <div id="main-column" class="flex-grow p-12">
+        <div id="main-column" class="flex-grow">
             
-            <section id="view-dashboard" class="max-w-4xl space-y-12">
-                <div>
-                    <span class="badge">Core Engine</span>
+            <section id="view-dashboard" class="dashboard-full-screen">
+                <div class="max-w-4xl">
                     <h2 class="hero-text">
                         Biological <br/> <span class="text-primary italic font-light text-6xl">Intelligence.</span>
                     </h2>
                     <p class="hero-subtext">
-                        The Botanist identifies pathogenic signatures in your botanical specimens with high-fidelity neural processing.
+                        Keep your garden thriving. Upload a photo of your plant to instantly identify health issues and get simple recovery steps.
                     </p>
                     <button class="btn-primary" onclick="triggerUpload()">
                         Launch New Analysis <span class="material-symbols-outlined">biotech</span>
@@ -73,7 +70,7 @@ Public/index.html
                 </div>
             </section>
 
-            <section id="view-analyze" class="hidden max-w-4xl space-y-8">
+            <section id="view-analyze" class="hidden p-12 max-w-5xl space-y-8">
                 <div class="flex justify-between items-end">
                     <div>
                         <h2 class="section-title">Lab Analysis</h2>
@@ -109,7 +106,7 @@ Public/index.html
                 </div>
             </section>
 
-            <section id="view-history" class="hidden space-y-10">
+            <section id="view-history" class="hidden p-12 space-y-10">
                 <h2 class="section-title">Archive & Metrics</h2>
                 
                 <div class="metrics-grid">
